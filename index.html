@@ -1,0 +1,791 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head lang="en">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta http-equiv="cache-control" content="max-age=0">
+	<meta http-equiv="cache-control" content="no-cache">
+	<meta http-equiv="expires" content="0">
+	<meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT">
+	<meta http-equiv="pragma" content="no-cache">
+	<title>NFS World Interactive Map - Beta r1.3</title>
+<meta name="application-name" content="NFS World Interactive Map - Beta r1.3">
+	<meta name="msapplication-tooltip" content="Start the page in Site Mode">
+	<meta name="msapplication-starturl" content="./">
+	<meta name="msapplication-navbutton-color" content="#324242">
+	<link rel="shortcut icon" type="image/x-icon" href="http://djgenerator.webege.com/nfsw/map/data/images/favicon.ico">
+	<link rel="icon" type="image/ico" href="http://djgenerator.webege.com/nfsw/map/data/images/favicon.ico">
+	<link rel="stylesheet" href="http://djgenerator.webege.com/nfsw/map/data/css/common.css" type="text/css">
+    <meta name="description" content="An interactive map for the Free-2-Play MMO racing game Need For Speed World.">    
+    <meta name="keywords" content="need for speed, world, online, circuits, sprints, team, escape, meeting place, interactive, map, google">    
+    <script type="text/javascript">
+		var _gaq = _gaq || [];
+		_gaq.push(["_setAccount", "UA-38780214-1"]);
+		_gaq.push(["_trackPageview"]);
+		(function() {
+			var ga = document.createElement("script"); ga.type = "text/javascript"; ga.async = true;
+			ga.src = ("https:" == document.location.protocol ? "https://ssl/" : "http://www/") + ".google-analytics.com/ga.js";
+			var s = document.getElementsByTagName("script")[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+	</script>
+	
+    <script type="text/javascript" src="ui/1-10-1/jquery-ui.js"></script>
+    <link rel="stylesheet" type="text/css" href="ui/1-10-1/themes/overcast/jquery-ui.min.css">
+	<script type="text/javascript" src="maps/api/js_key_AIzaSyA1YLIAzo1wug9EFMa5LkjXY4_WHUkme7w_sensor_false.js"></script>
+	<script type="text/javascript" src="svn/trunk/infobox/src/infobox.js"></script>
+	
+	
+    <script type="text/javascript">var todays_leaderboard_events_array;todays_leaderboard_events_array = [["Breaking Point","509"],["Bristol & Bayshore","26"],["Burrows","510"],["Dover Street","307"],["Downtown Challenge","61"],["Downturn","525"],["Gridlock","513"],["Heritage Heights","32"],["Hwy 99 & State","33"],["Lion's Challenge","120"],["Loop","517"],["Lyons & Hwy 201","146"],["Mason Street","81"],["North Broadway","50"],["North Road","76"],["Ocean View","295"],["Paradise Hotel","55"],["Reverse Track 02","529"],["Reverse Track 03","530"],["Reverse Track 04","531"],["Rockport Turnpike","502"],["Rosewood & Lyons","29"],["Rosewood Central","38"],["Rosewood Rally","526"],["Rosewood Rally Rev","527"],["Runway","516"],["Savannah Street","49"],["Silverton Way","51"],["Skirmish","515"],["Speed Fair","501"],["Stadium & Hwy 99","35"],["State & Warrent","13"],["Union & Hollis","30"],["Valley & State","131"],["Waterfront","11"],];</script>    
+	<script type="text/javascript">var sharelocation = "0";</script>
+	<script type="text/javascript">var maprootpath = "http:\/\/djgenerator.webege.com\/nfsw\/map\/";</script>
+	<script type="text/javascript">//<![CDATA[
+var map, overlay, tmplat, tmplng, Sharedlocationmarker;
+var LocationArrayLength, MapMarkersLength;
+var todays_leaderboard_events_array_Length;
+/* Set the center of our map.. the lng/lat it will start at.. */
+var latLng = new google.maps.LatLng(83.860,-157.47);
+/* Global vars to remember if events etc are visable.. */
+var showMeetingPlaces = true;
+var showSprints = true;
+var showCircuits = true;
+var showDrags = true;
+var showTeamEscapes = true;
+var showPursuitOutruns = true;
+var showSuburbs = false;
+var enableTodaysEvents = true;
+var showTodaysEvents = false;
+var enableShowServerStatus = false;
+var showPosition = false;
+var show_position_checked;
+/* Global to remember checkbox current state */
+var show_meeting_places_checked, show_sprints_checked, show_circuits_checked, show_drags_checked, show_team_escapes_checked, show_pursuit_outruns_checked;
+var show_suburbs_checked;
+var show_todays_events_checked;
+/* Global to remember checkbox current states when auto-setting after refreshes */
+var remember_show_meeting_places, remember_show_sprints, remember_show_circuits, remember_show_drags, remember_show_team_escapes, remember_show_pursuit_outruns, remember_show_position, remember_show_sprints;
+var remember_show_suburbs;
+var eventinfowindow, shareinfowindow;
+var copyrightNode;
+/* Markers/Event array setup.. */
+var markers = new Array(); /* Used to store the google markers */
+var selectFindEvent;
+var LangMeetingPlaceText = "Meeting Place";
+var LangSprintText = "Sprint";
+var LangCircuitText = "Circuit";
+var LangDragText = "Drag";
+var LangTeamEscapeText = "Team Escape";
+var LangPursuitOutrunText = "Pursuit Outrun";				
+var LangClassText = "Class";
+var LangLengthText = "Length";
+var LangLapsText = "Laps";
+var LangMaxPlayersText = "Max Players";
+var LangHeatLevelText = "Heat Level";
+var LangTimeLimitText = "Time Limit";
+var LangStrikesText = "Strikes";				
+var LangDefaultShareWindowText = "Drag this marker to your desired position on the map and this text will change into a shareable link!";
+var LangDefaultShareWindowBBCodeText = "Drag this marker to your desired position on the map and this text will change into a shareable link!";
+var LangShareWindowTitle = "Share This Location..";
+var IndexFilename = "index.php";
+if (enableTodaysEvents == true){
+	todays_leaderboard_events_array_Length = todays_leaderboard_events_array.length;
+}
+/* Sort Event Array.. */
+locations.sort();
+/* Set custom map type to show NFS Worlds map and not earth!.. */
+function CustomMapType() {
+	CustomMapType.prototype.tileSize = new google.maps.Size(256,256);
+	CustomMapType.prototype.maxZoom = 7;
+	CustomMapType.prototype.getTile = function(coord, zoom, ownerDocument) {
+		var div = ownerDocument.createElement('DIV');
+		var baseURL = './data/images/tiles/';
+		baseURL += zoom + '_' + coord.x + '_' + coord.y + '.png';
+		div.style.width = this.tileSize.width + 'px';
+		div.style.height = this.tileSize.height + 'px';
+		div.style.backgroundColor = '#152555';
+		div.style.backgroundImage = 'url(' + baseURL + ')';
+		return div;
+	}
+};
+/* Setup the maps default in-built controls.. */
+CustomMapType.prototype.name = 'Custom';
+CustomMapType.prototype.alt = 'Tile Coordinate Map Type';
+var CustomMapType = new CustomMapType();
+function initialize() {
+	var mapOptions = {
+		minZoom: 4,
+		maxZoom: 7,
+		isPng: true,
+		mapTypeControl: false,
+		streetViewControl: false,
+		center: latLng,
+		zoom: 5,
+		panControl: true,
+		panControlOptions: {
+			index: 2,
+			position: google.maps.ControlPosition.LEFT_TOP
+		},
+		zoomControl: true,
+		zoomControlOptions: {
+			style: google.maps.ZoomControlStyle.LARGE,
+			position: google.maps.ControlPosition.LEFT_TOP
+		},
+		mapTypeControlOptions: {
+			mapTypeIds: ['custom', google.maps.MapTypeId.ROADMAP],
+			style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
+		}
+	};
+	map = new google.maps.Map(document.getElementById('map'),mapOptions);
+	map.mapTypes.set('custom',CustomMapType);
+	map.setMapTypeId('custom');
+	/* Custom Controls */
+	addDropDown(map);
+	if(enableShowServerStatus){
+		addStatus(map);
+	}
+	addCopyright(map);
+	addFloatLogo(map);
+	addFloatSiteLogo(map)
+	addFloatInfo(map);
+	addFloatHome(map);
+	/* Markers */
+	/* ******* */
+	/* eventinfowindow = new google.maps.InfoWindow(); */
+	eventinfowindow = new InfoBox({
+         content: document.getElementById("infobox"),
+         disableAutoPan: false,
+         maxWidth: 300,
+         pixelOffset: new google.maps.Size(-144, 0),
+         zIndex: null,
+         boxStyle: {
+            background: "url('./data/images/event_tipbox.png') no-repeat",
+            opacity: 0.94,
+            width: "300px"
+        },
+        closeBoxMargin: "12px 4px 2px 2px",
+        closeBoxURL: "./data/images/close.png",
+        infoBoxClearance: new google.maps.Size(1, 1)
+    });
+	shareinfowindow = new google.maps.InfoWindow();
+	var marker;
+	var MeetingPlaceImage = './data/images/event_icons/icon_meeting_place.png';
+	var SprintImage = './data/images/event_icons/icon_sprint.png';
+	var CircuitImage = './data/images/event_icons/icon_circuit.png';
+	var DragImage = './data/images/event_icons/icon_drag.png';
+	var TeamEscapeImage = './data/images/event_icons/icon_team_escape.png';
+	var PursuitOutrunImage = './data/images/event_icons/icon_pursuit_outrun.png';
+	LocationArrayLength = locations.length;
+	var markerIcon, markerTitle;
+	for (var i = 0; i < LocationArrayLength; i++) {
+		if (locations[i][2] == 'Meeting Place') {
+			markerIcon = MeetingPlaceImage;
+			markerTitle = LangMeetingPlaceText;
+		}
+		else if (locations[i][2] == 'Sprint') {
+			markerIcon = SprintImage;
+			markerTitle = LangSprintText;
+		}
+		else if (locations[i][2] == 'Circuit') {
+			markerIcon = CircuitImage;
+			markerTitle = LangCircuitText;
+		}
+		else if (locations[i][2] == 'Drag') {
+			markerIcon = DragImage;
+			markerTitle = LangDragText;
+		}
+		else if (locations[i][2] == 'Team Escape') {
+			markerIcon = TeamEscapeImage;
+			markerTitle = LangTeamEscapeText;
+		}
+		else if (locations[i][2] == 'Pursuit Outrun') {
+			markerIcon = PursuitOutrunImage;
+			markerTitle = LangPursuitOutrunText;
+		}
+		marker = new google.maps.Marker({
+			position: new google.maps.LatLng(locations[i][11], locations[i][12]),
+			map: map,
+			animation: google.maps.Animation.DROP,
+			icon: markerIcon,
+			title: locations[i][0]+' - '+markerTitle
+		});
+		marker.setVisible(false);
+		/* Add the current marker to the array for later processing */
+		markers.push(marker);
+		google.maps.event.addListener(marker, 'click', (function(marker, i) {
+			return function() {
+				var pre_eventinfo_content =	'<div id="infobox">'+'<div id="infowindow_content">'+
+										'<div id="infowindow_title" class="ui-accordion-header ui-helper-reset ui-state-default ui-accordion-header-active ui-state-active ui-accordion-icons">'+marker.title+'<\/div>'+
+										'<div id="infowindow_bodyContent" class="ui-accordion-content ui-helper-reset ui-widget-content ui-accordion-content-active">'+
+											'<div id="infowindow_eventImage"><img id="event_image" src="./data/images/event_maps/'+locations[i][1]+'.png" alt="Event Image" width="128" height="128"/><\/div>'+
+											'<div id="infowindow_eventInfo">';
+				var post_eventinfo_content = 			'<\/div>'+
+										'<\/div>'+
+									'<\/div>'+'<\/div>';
+				if (locations[i][2] == 'Meeting Place') {
+					eventinfowindow.setContent(
+						pre_eventinfo_content+
+						LangClassText+': '+locations[i][3]+
+						post_eventinfo_content
+					);
+				}
+				else if (locations[i][2] == 'Sprint') {
+					eventinfowindow.setContent(
+						pre_eventinfo_content+
+							LangClassText+': '+locations[i][3]+'<br />'+
+							LangLengthText+': '+locations[i][4]+'km<br />'+
+						post_eventinfo_content
+					);
+				}
+				else if (locations[i][2] == 'Circuit') {
+					eventinfowindow.setContent(
+						pre_eventinfo_content+
+							LangClassText+': '+locations[i][3]+'<br />'+
+							LangLapsText+': '+locations[i][10]+'<br />'+
+							LangLengthText+': '+locations[i][4]+'km<br />'+
+						post_eventinfo_content
+					);
+				}
+				else if (locations[i][2] == 'Drag') {
+					eventinfowindow.setContent(
+						pre_eventinfo_content+
+							LangClassText+': '+locations[i][3]+'<br />'+
+							LangMaxPlayersText+': '+locations[i][5]+'<br />'+
+							LangLengthText+': '+locations[i][4]+'km<br />'+
+						post_eventinfo_content
+					);
+				}
+				else if (locations[i][2] == 'Team Escape') {
+					eventinfowindow.setContent(
+						pre_eventinfo_content+
+							LangClassText+': '+locations[i][3]+'<br />'+
+							LangMaxPlayersText+': '+locations[i][5]+'<br />'+
+							LangHeatLevelText+': '+locations[i][7]+'<br />'+
+							LangTimeLimitText+': '+locations[i][8]+'<br />'+
+							LangStrikesText+': '+locations[i][9]+'<br />'+
+							LangLengthText+': '+locations[i][4]+'km<br />'+
+						post_eventinfo_content
+					);
+				}
+				else if (locations[i][2] == 'Pursuit Outrun') {
+					eventinfowindow.setContent(
+						pre_eventinfo_content+
+							LangClassText+': '+locations[i][3]+'<br />'+
+						post_eventinfo_content
+					);
+				}
+				else {
+					eventinfowindow.setContent('Error!');
+				}
+				eventinfowindow.open(map, marker);
+				shareinfowindow.close(map);
+			}
+		})(marker, i));
+		MapMarkersLength = markers.length;
+	}
+	google.maps.event.addListener(map, 'click', function() {
+		eventinfowindow.close(map);
+		shareinfowindow.close(map);
+	});
+	/* Hack Googles lame InfoWindow style.. */
+	/*
+	google.maps.event.addListener(eventinfowindow, 'domready', function() {
+		document.getElementById('infowindow_content').parentNode.style.overflow='';
+		document.getElementById('infowindow_content').parentNode.style.left='0';
+		document.getElementById('infowindow_content').parentNode.style.top='0';
+		document.getElementById('infowindow_content').parentNode.style.width='100.6%';
+		document.getElementById('infowindow_content').parentNode.style.height='99.2%';
+		document.getElementById('infowindow_content').parentNode.parentNode.style.overflow='';
+		document.getElementById('infowindow_content').parentNode.parentNode.style.left='0';
+		document.getElementById('infowindow_content').parentNode.parentNode.style.top='0';
+		document.getElementById('infowindow_content').parentNode.parentNode.style.width='100%';
+		document.getElementById('infowindow_content').parentNode.parentNode.style.height='100%';
+	});
+	*/
+	/* Add Location Marker.. */
+	locationmarker = new google.maps.Marker({
+		position: latLng,
+		map: map,
+		animation: google.maps.Animation.DROP,
+		draggable: true
+	});
+	locationmarker.setVisible(false);
+	if (sharelocation == '1'){
+		/* Add SharedLocation Marker.. */
+		Sharedlocationmarker = new google.maps.Marker({
+			position: new google.maps.LatLng(sharelat,sharelng),
+			map: map,
+			title: 'Shared Location',
+			animation: google.maps.Animation.DROP
+		});
+		Sharedlocationmarker.setVisible(false);
+	}
+	/* Upon refresh, make sure running functions match the checkboxes.. */
+	/* (This is to deal with Firefox remembering form control states!) */
+	/*  */
+	/* Remember Meeting Places. */
+	remember_show_meeting_places = document.getElementById('show_meeting_places');
+	if (!showMeetingPlaces){
+		remember_show_meeting_places.checked = false;
+		hide('Meeting Place');
+	} else {
+		remember_show_meeting_places.checked = true;
+		show('Meeting Place');
+	}
+	/* Remember Show Sprints.. */
+	remember_show_sprints = document.getElementById('show_sprints');
+	if (!showSprints){
+		remember_show_sprints.checked = false;
+		hide('Sprint');
+	} else {
+		remember_show_sprints.checked = true;
+		show('Sprint');
+	}
+	/* Remember Show Circuits.. */
+	remember_show_circuits = document.getElementById('show_circuits');
+	if (!showCircuits){
+		remember_show_circuits.checked = false;
+		hide('Circuit');
+	} else {
+		remember_show_circuits.checked = true;
+		show('Circuit');
+	}
+	/* Remember Show Drags.. */
+	remember_show_drags = document.getElementById('show_drags');
+	if (!showDrags){
+		remember_show_drags.checked = false;
+		hide('Drag');
+	} else {
+		remember_show_drags.checked = true;
+		show('Drag');
+	}
+	/* Remember Team Escapes. */
+	remember_show_team_escapes = document.getElementById('show_team_escapes');
+	if (!showTeamEscapes){
+		remember_show_team_escapes.checked = false;
+		hide('Team Escape');
+	} else {
+		remember_show_team_escapes.checked = true;
+		show('Team Escape');
+	}
+	/* Remember Pursuit Outruns.*/
+	remember_show_pursuit_outruns = document.getElementById('show_pursuit_outruns');
+	if (!showPursuitOutruns){
+		remember_show_pursuit_outruns.checked = false;
+		hide('Pursuit Outrun');
+	} else {
+		remember_show_pursuit_outruns.checked = true;
+		show('Pursuit Outrun');
+	}
+	/* Untick Show Position on refreshes.. */
+	remember_show_position = document.getElementById('show_position');
+	remember_show_position.checked = false;
+	/* Remember Show Suburbs.. */
+	remember_show_suburbs = document.getElementById('show_suburbs');
+	remember_show_suburbs.checked = showSuburbs;
+	if (sharelocation == '1'){
+		Sharedlocationmarker.setVisible(true);
+		map.setZoom(6);
+		map.panTo(Sharedlocationmarker.getPosition());
+	}
+	/* Add Event array to dropdown.. */
+	selectFindEvent = document.getElementById('selectEvent');
+	for (var i=0; i<LocationArrayLength; i++) {
+		var opt = selectFindEvent.options;
+		opt[opt.length] = new Option(locations[i][0],locations[i][0])
+	}
+}
+function resetFind() {
+	if (document.getElementById('selectEvent').selectedIndex > 0) {
+		//map.setZoom(5);
+		map.panTo(latLng);
+		document.getElementById('selectEvent').selectedIndex = 0;
+		for (var i=0; i<MapMarkersLength; i++) {
+			markers[i].setVisible(false);
+		}
+	}
+}
+function goHome() {
+	map.setZoom(5);
+	map.panTo(latLng);
+}
+/* Find/show a single event.. */
+function findEventByName() {
+	//alert(selectFindEvent.options[selectFindEvent.selectedIndex].text);
+	if (selectFindEvent.selectedIndex>0){
+		/* Uncheck our checkboxes.. */
+		uncheckAllEvents();
+		for (var i=0; i<MapMarkersLength; i++) {
+			/* If dropdown selection matches marker name.. */
+			if (locations[i][0] == selectFindEvent.options[selectFindEvent.selectedIndex].text) {
+				/* Close any open Info Windows */
+				eventinfowindow.close(map);
+				shareinfowindow.close(map);
+				/* Set matched marker to visible.. */
+				markers[i].setVisible(true);
+				/* Zoom map.. */
+				//map.setZoom(6);
+				/* Pan map to the found marker.. */
+				map.panTo(markers[i].getPosition());
+			} else {
+				/* If current marker in loop does not match names, hide it!.. */
+				markers[i].setVisible(false);
+			}
+		}
+	}
+}
+function addDropDown(map) {
+	var dropdown = document.getElementById('dropdown-holder');
+	dropdown.index = 0;
+	/* Disable right click on this div.. */
+	dropdown.oncontextmenu=new Function ("return false")
+	map.controls[google.maps.ControlPosition.RIGHT_TOP].push(dropdown);
+}
+function addStatus(map) {
+	var serverstatus = document.getElementById('server-status-holder');
+	serverstatus.index = 0;
+	/* Disable right click on this div.. */
+	serverstatus.oncontextmenu=new Function ("return false")
+	map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(serverstatus);
+}
+function addCopyright(map) {
+	var copyright = document.getElementById('copyright-control-holder');
+	copyright.index = 0;
+	/* Disable right click on this div.. */
+	copyright.oncontextmenu=new Function ("return false")
+	map.controls[google.maps.ControlPosition.BOTTOM_RIGHT].push(copyright);
+}
+function addFloatLogo(map) {
+	var floatlogo = document.getElementById('floating-logo-holder');
+	floatlogo.index = 1;
+	/* Disable right click on this div.. */
+	floatlogo.oncontextmenu=new Function ("return false")
+	map.controls[google.maps.ControlPosition.TOP_LEFT].push(floatlogo);
+}
+function addFloatSiteLogo(map) {
+	var floatsitelogo = document.getElementById('floating-site-logo-holder');
+	floatsitelogo.index = 1;
+	/* Disable right click on this div.. */
+	floatsitelogo.oncontextmenu=new Function ("return false")
+	map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(floatsitelogo);
+}
+function addFloatInfo(map) {
+	var floatinfo = document.getElementById('latlng-debug-holder');
+	floatinfo.index = 2;
+	map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(floatinfo);
+}
+function addFloatHome(map) {
+	var floathome = document.getElementById('home-button-holder');
+	floathome.index = 0;
+	/* Disable right click on this div.. */
+	floathome.oncontextmenu=new Function ("return false")
+	map.controls[google.maps.ControlPosition.LEFT_TOP].push(floathome);
+}
+function isInfoWindowOpen(infoWindow){
+    return (infoWindow.getMap()!=null);
+}
+//]]></script>
+<script type="text/javascript">
+/* Share Marker Functions */
+var IsUpdatingPos = false;
+function updateMarkerPosition(latLng) {
+	if (!IsUpdatingPos){
+	IsUpdatingPos = true;
+		document.getElementById('info').innerHTML = [
+			latLng.lat(),
+			latLng.lng()
+		].join(', ');
+		tmplat = 'lat='+latLng.lat(),
+		tmplng = 'lng='+latLng.lng()
+		completeURL = maprootpath + IndexFilename;
+		if (isInfoWindowOpen(shareinfowindow)){
+			document.getElementById('sharelocationcopybox').value = [
+			completeURL + '?sharelocation=1&' + tmplat + '&' + tmplng
+			].join();
+			document.getElementById('sharelocationbbcopybox').value = [
+			'[url]' + completeURL + '?sharelocation=1&' + tmplat + '&' + tmplng + '[\/url]'
+			].join();
+		}
+		LangDefaultShareWindowText = completeURL + '?sharelocation=1&' + tmplat + '&' + tmplng;
+		LangDefaultShareWindowBBCodeText = '[url]' + completeURL + '?sharelocation=1&' + tmplat + '&' + tmplng + '[\/url]';
+	IsUpdatingPos = false;
+	}
+}
+/* Toggle Share Location Marker.. */
+function togglePosition() {
+	show_position_checked = document.getElementById('show_position');
+	if(showPosition === false) {
+		if(show_position_checked.checked){
+			showPosition = true;
+			disableMenuCheckboxes(true,"dropdown-holder");
+			locationmarker.position = map.getCenter();
+			google.maps.event.addListener(locationmarker, 'drag', function() {
+				updateMarkerPosition(locationmarker.getPosition());
+			});
+			google.maps.event.addListener(locationmarker, 'click', function() {
+				if(!(shareinfowindow.getMap())) {
+					var pre_shareinfo_content =	'<div id="infowindow_content">'+
+												'<div id="share_infowindow_title">'+LangShareWindowTitle+'<\/div>'+
+													'<div id="tabs"><ul><li><a href="#tabs-1">URL<\/a><\/li><li><a href="#tabs-2">BB Code<\/a><\/li><\/ul>'+
+														'<div id="infowindow_bodyContent">'+
+															'<div id="tabs-1"><textarea id="sharelocationcopybox" rows="3" cols="50" onfocus="$(this).select()" readonly>';
+					var mid_shareinfo_content =				'<\/textarea><\/div>'+
+															'<div id="tabs-2"><textarea id="sharelocationbbcopybox" rows="3" cols="50" onfocus="$(this).select()" readonly>';
+					var post_shareinfo_content =	 		'<\/textarea><\/div>'+
+														'<\/div>'+
+													'<\/div>'+
+												'<\/div>';
+					shareinfowindow.setContent(
+						pre_shareinfo_content+LangDefaultShareWindowText+mid_shareinfo_content+LangDefaultShareWindowBBCodeText+post_shareinfo_content
+					);
+				google.maps.event.addListener(shareinfowindow, 'domready', function() {
+					$('#sharelocationbbcopybox').show();
+					$( "#tabs" ).tabs();
+				});
+				shareinfowindow.open(map, locationmarker);
+				}
+				if (isInfoWindowOpen(eventinfowindow)){
+					eventinfowindow.close(map);
+				}
+			});
+			if (sharelocation == '1'){
+				Sharedlocationmarker.setVisible(false);
+			}
+			locationmarker.setVisible(true);
+			disableMenuCheckboxes(false,"dropdown-holder");
+		}
+	}
+	else {
+		if(!show_position_checked.checked){
+			showPosition = false;
+			disableMenuCheckboxes(true,"dropdown-holder");
+			/* Clear event listeners.. */
+			google.maps.event.clearListeners(locationmarker, 'drag');
+			google.maps.event.clearListeners(locationmarker, 'click');
+			locationmarker.setVisible(false);
+			document.getElementById('info').innerHTML = '';
+			shareinfowindow.close(map);
+			disableMenuCheckboxes(false,"dropdown-holder");
+		}
+	}
+}
+/* disableMenuCheckboxes(true,"dropdown-holder"); */
+function disableMenuCheckboxes(isenabled, parent){
+    var parent = document.getElementById(parent),
+        CBs = parent.getElementsByTagName('input'),
+        i;
+	var CheckboxCount = CBs.length;
+    //loop through all input elements
+    for(i=0;i<CheckboxCount;i++){
+        //make sure the input is a checkbox
+        if(CBs[i].type && CBs[i].type=='checkbox'){
+            //set disabled true or false on this checkbox
+            CBs[i].disabled = isenabled;
+        }
+    }
+}
+jQuery(document).ready(function(){
+	$("#map").fadeIn("slow");
+	$("#dropdown-holder").fadeIn("slow");
+	if(enableShowServerStatus){
+		$("#server-status-holder").fadeIn("slow");
+	};
+	$("#home-button-holder").fadeIn("slow");
+	$("#copyright-control-holder").fadeIn("slow");
+	$("#floating-site-logo-holder").fadeIn("slow");
+	function ajax_call() {
+		var seconds = new Date().getTime() / 1000;
+		var url= "./data/server_status.php?output=json&time=" + seconds;
+		$.getJSON(url, function(data) {
+		})
+		.done(function(data) {
+			$("#shard").replaceWith('<table id="shard"><\/table>');
+			$.each(data.worldServerStatusList, function(data, worldServerStatusList){
+				if(worldServerStatusList.status=="Up"){
+					statusclass = 'shardstatusup';
+				}else{
+					statusclass = 'shardstatusdown';
+				};
+				$("#shard").append('<tr>'+
+					'<td class="shardname" title="' + worldServerStatusList.localizedMessage + '">' + 
+						'<label class="lbl_server_status_shard">' + worldServerStatusList.shard + ':<\/label>' +
+					'<\/td>'+
+					'<td class="' + statusclass + '" title="' + worldServerStatusList.localizedMessage + '">' + 
+						'<label class="lbl_server_status_status">' + worldServerStatusList.status + '<\/label>' +
+					'<\/td>'+
+				'<\/tr>');
+			});
+		});
+	};
+	if(enableShowServerStatus){
+		//var interval = 1000 * 60 * 1; // where 30 is your every X minutes
+		var interval = 1000 * 30; // where 30 is your every X seconds
+		ajax_call();
+		setInterval(ajax_call, interval);
+	};
+	$('#accordion').accordion({
+		collapsible: true,
+		navigation: true,
+		active: true,
+		clearStyle: true
+	});
+	$('.accordion .head').click(function() {
+		$(this).next().toggle();
+		return false;
+	}).next().hide();
+	$("#goFindButton").button({
+		icons: {
+		primary: "ui-icon-search"
+		},
+		text: false
+	});
+	$('#findForm').submit(function () {
+		findEventByName()
+		return false;
+	});
+	$("#resetFindButton").button();
+	$('#resetFindForm').submit(function () {
+		resetFind();
+		return false;
+	});
+	$('#checkAll').click(function () {
+		checkAllEvents();
+		return false;
+	});
+	$('#uncheckAll').click(function () {
+		uncheckAllEvents();
+		return false;
+	});
+	$("#homeButton").button();
+	/*
+	$( document ).tooltip({
+		track: true,
+		show: {
+			effect: "slideDown",
+			delay: 250
+		}
+	});
+	*/
+	var fixIETextSelect = document.getElementById('dropdown-holder');
+	fixIETextSelect.onselectstart = function() {return false;}
+});
+google.maps.event.addDomListener(window, 'load', initialize);
+</script>
+
+
+</head>
+<body>
+	<div id="map"></div>
+	<div id="floating-logo-holder">
+		<a href="/"><img id="logo_float_image" src="http://djgenerator.webege.com/nfsw/map/data/images/nfsw_float_logo.png" alt="NFS World Interactive Map - Beta r1.3 logo" title="NFS World Interactive Map - Beta r1.3" width="157" height="57"></a>
+	</div>
+	<noscript>
+        <div id="noscript"><h3>JavaScript is not enabled!</h3><br><br>Please enable Javascript in your browser and try loading the page again.</div>
+    </noscript>
+	<div id="floating-site-logo-holder">
+		<a href="/" target="_blank"><img id="homepage_logo_float_image" src="http://djgenerator.webege.com/nfsw/map/data/images/homepage_logo.png" alt="A map by Generator - Click to visit his homepage.. logo" title="A map by Generator - Click to visit his homepage.." width="79" height="22"></a>
+	</div>
+	<div id="home-button-holder">
+		<div id="home"><div id="home-content"><button id="homeButton" title="Resets the zoom level and centers the map view." onclick="goHome();">Home</button></div></div>
+	</div>
+	<div id="latlng-debug-holder">
+		<div id="info"></div>
+	</div>
+	<div id="dropdown-holder">
+		<div class="dropdown">
+	        <div id="accordion">
+				<h3><a href="#">Toggle</a></h3>
+				<div>
+					<div class="dropdown-item">
+						<input type="checkbox" id="show_meeting_places" onclick="toggleMeetingPlaces()">
+						<label for="show_meeting_places" id="lbl_show_meeting_places">Show Meeting Places</label>
+					</div>
+					<div class="dropdown-item">
+						<input type="checkbox" id="show_sprints" onclick="toggleSprints()" checked>
+						<label for="show_sprints" id="lbl_show_sprints">Show Sprints</label>
+					</div>
+					<div class="dropdown-item">
+						<input type="checkbox" id="show_circuits" onclick="toggleCircuits()" checked>
+						<label for="show_circuits" id="lbl_show_circuits">Show Circuits</label>
+					</div>
+					<div class="dropdown-item">
+						<input type="checkbox" id="show_drags" onclick="toggleDrags()" checked>
+						<label for="show_drags" id="lbl_show_drags">Show Drags</label>
+					</div>
+					<div class="dropdown-item">
+						<input type="checkbox" id="show_team_escapes" onclick="toggleTeamEscapes()">
+						<label for="show_team_escapes" id="lbl_show_team_escapes">Show Team Escapes</label>
+						<label id="lbl_show_team_escapes_disabled">Show Team Escapes</label>
+					</div>
+					<div class="dropdown-item">
+						<input type="checkbox" id="show_pursuit_outruns" onclick="togglePursuitOutruns()">
+						<label for="show_pursuit_outruns" id="lbl_show_pursuit_outruns">Show Pursuit Outruns</label>
+						<label id="lbl_show_pursuit_outruns_disabled">Show Pursuit Outruns</label>
+					</div>
+					<div class="dropdown-item">
+						<div class="menu-links">
+							<a id="checkAll" href="#" class="dropdown-link">Check All</a> | <a id="uncheckAll" href="#" class="dropdown-link">Uncheck All</a>
+						</div>
+					</div>
+					<div class="float_seperator_bar"></div>
+										<div class="dropdown-item">
+						<input type="checkbox" id="show_Todays" onclick="toggleTodays()">
+						<label for="show_Todays" id="lbl_show_todays">Events Of The Week</label>
+					</div>
+					<div class="float_seperator_bar"></div>
+                    <div class="dropdown-item">
+						<input type="checkbox" id="show_suburbs" onclick="toggleSuburbs()">
+						<label for="show_suburbs" id="lbl_show_suburbs">Show Suburbs</label>
+					</div>
+				</div>
+				<h3><a href="#">Find</a></h3>
+				<div>
+					<div class="searchbox">
+                	<form id="findForm" action="/">
+								<select id="selectEvent">
+									<option>Find an event..</option>
+								</select>
+								<button id="goFindButton" type="submit" title="Find.."></button>
+                    </form>
+				</div>
+				<label id="lbl_find_event_help">Select an event in the list above to show its location on the map.</label>
+                <form id="resetFindForm" action="/">
+						<button id="resetFindButton" type="submit">Reset Find</button>
+				</form>
+				</div>
+				<h3><a href="#">Share</a></h3>
+				<div>
+							<div class="dropdown-item">
+								<input type="checkbox" id="show_position" onclick="togglePosition()">
+								<label for="show_position" id="lbl_show_position">Share A Location..</label>
+							</div>
+							<label id="lbl_share_location_help">Drag the marker to your desired location and then click on it to show sharing information.</label>
+    	        </div>
+			</div>
+		</div>
+	</div>
+	<div id="server-status-holder">
+		<div id="serverstatus">
+			<div id="serverstatus_title" class="ui-accordion-header ui-helper-reset ui-accordion-header-active ui-state-active ui-accordion-icons ui-widget ui-corner-top">
+				<label id="lbl_server_status_title">NFSW Server Status</label>
+			</div>
+            <div id="panel_bodyContent" class="ui-accordion-content ui-helper-reset ui-widget-content ui-accordion-content-active ui-widget ui-corner-bottom">
+                <table id="shard">
+                	<tr>
+                    	<td class="ajax-loading-ani">
+                        	<img src="http://djgenerator.webege.com/nfsw/map/data/images/wait.gif" alt="Loading...">
+                        </td>
+                    </tr>
+                </table>
+            </div>
+		</div>
+	</div>
+	<div class="infobox-wrapper">
+		<div id="infobox">
+		</div>
+	</div>
+    <div id="copyright-control-holder">
+		<div id="copyright-control">
+        	<a target="_blank" href="http://www.needforspeed.com/">"Need For Speed"</a>, <a target="_blank" href="http://world.needforspeed.com/">"Need For Speed World"</a> and the Need For Speed Logo are all trademark of <a target="_blank" href="http://www.ea.com/">Electronic Arts</a>. Map Copyright &copy;2013 <a target="_blank" href="/">Sean "Generator" Hammett</a>
+		</div>
+	</div>
+</body>
+</html>
